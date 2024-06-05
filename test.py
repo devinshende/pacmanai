@@ -75,13 +75,13 @@ class testAgent(CaptureAgent):
         if self.isRed and enemyPos[0] < self.middle:
             xDiff = enemyPos[0] - selfPos[0]
             yDiff = enemyPos[1] - selfPos[1]
-            if xDiff == 1:
+            if xDiff == 1 and yDiff == 0:
                 return 'East'
-            if xDiff == -1:
+            if xDiff == -1 and yDiff == 0:
                 return 'West'
-            if yDiff == 1:
+            if yDiff == 1 and xDiff == 0;
                 return 'North'
-            if yDiff == -1:
+            if yDiff == -1 and xDiff == 0:
                 return 'South'
             return self.defensiveBreadthFirstSearch(gameState, self.index, enemyPos, self.noHeuristic)[0]
         elif not self.isRed and enemyPos[0] >= self.middle:
