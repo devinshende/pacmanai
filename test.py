@@ -59,18 +59,46 @@ class testAgent(CaptureAgent):
 
         enemyDistances = {}
         for i in self.border:
-            if (self.isRed and enemyPos[0] < self.middle * 1.5 ) or (not self.isRed and enemyPos > self.middle/2):
-                enemyDistances[i[0]] = self.breadthFirstSearch(gameState, self.enemyIndex, i[1], self.manhattanHeuristic)[1]
-            else:
-                enemyDistances[i[0]] = abs(enemyPos[0] - i[1][0]) + abs(enemyPos[1] - i[1][1])
+            enemyDistances[i[0]] = abs(enemyPos[0] - i[1][0]) + abs(enemyPos[1] - i[1][1])
+            # if (self.isRed and enemyPos[0] < self.middle * 1.5 ) or (not self.isRed and enemyPos > self.middle/2):
+            #     enemyDistances[i[0]] = self.breadthFirstSearch(gameState, self.enemyIndex, i[1], self.manhattanHeuristic)[1]
+            # else:
+            #     enemyDistances[i[0]] = abs(enemyPos[0] - i[1][0]) + abs(enemyPos[1] - i[1][1])
         guardSpot = min(enemyDistances, key=enemyDistances.get)
 
-        if self.isRed and enemyPos[0] < self.middle:
-            return self.defensiveBreadthFirstSearch(gameState, self.index, enemyPos, self.enemyHeuristic)[0]
-        elif not self.isRed and enemyPos[0] >= self.middle:
-            return self.defensiveBreadthFirstSearch(gameState, self.index, enemyPos, self.enemyHeuristic)[0]
+        #get the closest food to the enemy
+        enFoodDistances = {}
+        for food in self.getFoodYouAreDefending(gameState).asList() + self.getCapsulesYouAreDefending(gameState):
+            enFoodDistances[food] = abs(enemyPos[0] - food[0]) + abs(enemyPos[1] - food[1])
+        predictedSpot = min(enFoodDistances, key=enFoodDistances.get)
 
-        if self.index > 1 and gameState.getScore() < 1 and ghostManhattans[self.enemyIndex] > 4:
+        if self.isRed and enemyPos[0] < self.middle:
+            xDiff = enemyPos[0] - selfPos[0]
+            yDiff = enemyPos[1] - selfPos[1]
+            if xDiff == 1:
+                return 'East'
+            if xDiff == -1:
+                return 'West'
+            if yDiff == 1:
+                return 'North'
+            if yDiff == -1:
+                return 'South'
+            return self.defensiveBreadthFirstSearch(gameState, self.index, enemyPos, self.noHeuristic)[0]
+        elif not self.isRed and enemyPos[0] >= self.middle:
+            xDiff = enemyPos[0] - selfPos[0]
+            yDiff = enemyPos[1] - selfPos[1]
+            if xDiff == 1:
+                return 'East'
+            if xDiff == -1:
+                return 'West'
+            if yDiff == 1:
+                return 'North'
+            if yDiff == -1:
+                return 'South'
+
+            return self.defensiveBreadthFirstSearch(gameState, self.index, enemyPos, self.noHeuristic)[0]
+
+        if self.index > 1 and gameState.getScore() < 1 and ghostManhattans[self.enemyIndex] > 2:
             if self.isRed and selfPos[0] > self.middle/2:
                 return self.foodBreadthFirstSearch(gameState, self.index, bestFood, self.noHeuristic)[0]
             elif not self.isRed and selfPos[0] < self.middle + (self.middle / 2):
@@ -121,7 +149,7 @@ class testAgent(CaptureAgent):
             return self.breadthFirstSearch(gameState, self.index, guardSpot, self.noHeuristic)[0]
 
         if ghostManhattans[self.enemyIndex] > 4:
-            return self.breadthFirstSearch(gameState, self.index, newEnemyPos, self.noHeuristic)[0]
+            return self.breadthFirstSearch(gameState, self.index, guardSpot, self.noHeuristic)[0]
         else:
             return self.defensiveBreadthFirstSearch(gameState, self.index, guardSpot, self.noHeuristic)[0]
         #print("Done! Guarding: ",guardSpot)
@@ -212,7 +240,10 @@ class testAgent(CaptureAgent):
         exploredNodes = [gameState.getAgentPosition(index)]
         counter = 0
         while True:
-
+            #     print("Frontier: ")
+            #     for i in frontier:
+            #         print(i.getAgentPosition(index),end=", ")
+            #     print("\n")
             newFrontierPull = frontier.pop(0)
             currentState = newFrontierPull[0]
             currentCost = newFrontierPull[1]
