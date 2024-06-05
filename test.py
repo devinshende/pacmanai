@@ -1,7 +1,23 @@
+#from pacai.util import reflection
 import random
-from copy import copy
-
 from pacai.agents.capture.capture import CaptureAgent
+
+def createTeam(firstIndex, secondIndex, isRed,
+        first = 'pacai.student.test.testAgent',
+        second = 'pacai.student.test.testAgent'):
+    """
+    This function should return a list of two agents that will form the capture team,
+    initialized using firstIndex and secondIndex as their agent indexed.
+    isRed is True if the red team is being created,
+    and will be False if the blue team is being created.
+    """
+
+    # firstAgent = reflection.qualifiedImport(first)
+    # secondAgent = reflection.qualifiedImport(second)
+    return [
+        testAgent(firstIndex, isRed),
+        testAgent(secondIndex, isRed),
+    ]
 
 class testAgent(CaptureAgent):
     """
@@ -39,7 +55,7 @@ class testAgent(CaptureAgent):
 
         # Your initialization code goes here, if you need any.
     def chooseAction(self, gameState):
-        # print("INDEX: ",self.index)
+        #print("INDEX: ",self.index)
         # print("Grabbed indices: ",self.index, self.enemyIndex)
         selfPos = gameState.getAgentPosition(self.index)
         enemyPos = gameState.getAgentPosition(self.enemyIndex)
@@ -58,10 +74,11 @@ class testAgent(CaptureAgent):
 
         enemyDistances = {}
         for i in self.border:
-            if (self.isRed and enemyPos[0] < self.middle * 1.3 ) or (not self.isRed and enemyPos > self.middle * 0.5):
-                enemyDistances[i[0]] = self.breadthFirstSearch(gameState, self.enemyIndex, i[1], self.manhattanHeuristic)[1]
-            else:
-                enemyDistances[i[0]] = abs(enemyPos[0] - i[1][0]) + abs(enemyPos[1] - i[1][1])
+            # if (self.isRed and enemyPos[0] < self.middle * 1.3 ) or (not self.isRed and enemyPos > self.middle * 0.5):
+            #     enemyDistances[i[0]] = self.breadthFirstSearch(gameState, self.enemyIndex, i[1], self.manhattanHeuristic)[1]
+            # else:
+            #     enemyDistances[i[0]] = abs(enemyPos[0] - i[1][0]) + abs(enemyPos[1] - i[1][1])
+            enemyDistances[i[0]] = abs(enemyPos[0] - i[1][0]) + abs(enemyPos[1] - i[1][1])
 
         defenseTies = []
         for i in enemyDistances:
@@ -117,46 +134,6 @@ class testAgent(CaptureAgent):
                 return self.foodBreadthFirstSearch(gameState, self.index, bestFood, self.noHeuristic)[0]
             elif not self.isRed and selfPos[0] < self.middle + (self.middle / 2):
                 return self.foodBreadthFirstSearch(gameState, self.index, bestFood, self.noHeuristic)[0]
-
-
-
-
-
-        # newEnemyPos = guardSpot
-        # newState = copy(gameState)
-
-        # for i in range(10):
-        #     adjacent = newState.getLegalActions(self.enemyIndex)
-        #     adjacent.remove('Stop')
-        #     if len(adjacent) == 0:
-        #         newEnemyPos = newState.getAgentPosition(self.enemyIndex)
-        #         break
-        #     chosenAction = None
-        #     if self.isRed:
-        #         if 'West' in adjacent:
-        #             chosenAction = 'West'
-        #         elif 'East' in adjacent:
-        #             if len(adjacent) == 1:
-        #                 chosenAction = 'East'
-        #             else:
-        #                 adjacent.remove('East')
-        #                 chosenAction = random.choice(adjacent)
-        #         else:
-        #             chosenAction = random.choice(adjacent)
-        #     if not self.isRed:
-        #         if 'East' in adjacent:
-        #             chosenAction = 'East'
-        #         elif 'West' in adjacent:
-        #             if len(adjacent) == 1:
-        #                 chosenAction = 'West'
-        #             else:
-        #                 adjacent.remove('West')
-        #                 chosenAction = random.choice(adjacent)
-        #         else:
-        #             chosenAction = random.choice(adjacent)
-        #     newState = newState.generateSuccessor(self.enemyIndex, chosenAction)
-
-        #newEnemyPos = newState.getAgentPosition(self.enemyIndex)
 
         if self.isRed and selfPos[0] >= self.middle:
             return self.breadthFirstSearch(gameState, self.index, guardSpot, self.noHeuristic)[0]
