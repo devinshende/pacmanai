@@ -41,7 +41,6 @@ class testAgent(CaptureAgent):
     def chooseAction(self, gameState):
         # print("INDEX: ",self.index)
         # print("Grabbed indices: ",self.index, self.enemyIndex)
-        returnMe = "Stop"
         selfPos = gameState.getAgentPosition(self.index)
         enemyPos = gameState.getAgentPosition(self.enemyIndex)
         ghostManhattans = {}
@@ -59,12 +58,27 @@ class testAgent(CaptureAgent):
 
         enemyDistances = {}
         for i in self.border:
-            enemyDistances[i[0]] = abs(enemyPos[0] - i[1][0]) + abs(enemyPos[1] - i[1][1])
-            # if (self.isRed and enemyPos[0] < self.middle * 1.5 ) or (not self.isRed and enemyPos > self.middle/2):
-            #     enemyDistances[i[0]] = self.breadthFirstSearch(gameState, self.enemyIndex, i[1], self.manhattanHeuristic)[1]
-            # else:
-            #     enemyDistances[i[0]] = abs(enemyPos[0] - i[1][0]) + abs(enemyPos[1] - i[1][1])
-        guardSpot = min(enemyDistances, key=enemyDistances.get)
+            if (self.isRed and enemyPos[0] < self.middle * 1.3 ) or (not self.isRed and enemyPos > self.middle * 0.5):
+                enemyDistances[i[0]] = self.breadthFirstSearch(gameState, self.enemyIndex, i[1], self.manhattanHeuristic)[1]
+            else:
+                enemyDistances[i[0]] = abs(enemyPos[0] - i[1][0]) + abs(enemyPos[1] - i[1][1])
+
+        defenseTies = []
+        for i in enemyDistances:
+            if enemyDistances[i] == min(enemyDistances.values()):
+                defenseTies.append(i)
+        if len(defenseTies) == 1:
+            guardSpot = defenseTies[0]
+        else:
+            closest = None
+            middleDist = 99999
+            for i in defenseTies:
+                tempMidDist = abs(i[1] - self.gameWidth/2)
+                if tempMidDist < middleDist:
+                    closest = i
+                    middleDist = tempMidDist
+
+            guardSpot = closest
 
         #get the closest food to the enemy
         enFoodDistances = {}
@@ -79,7 +93,7 @@ class testAgent(CaptureAgent):
                 return 'East'
             if xDiff == -1 and yDiff == 0:
                 return 'West'
-            if yDiff == 1 and xDiff == 0;
+            if yDiff == 1 and xDiff == 0:
                 return 'North'
             if yDiff == -1 and xDiff == 0:
                 return 'South'
@@ -87,18 +101,18 @@ class testAgent(CaptureAgent):
         elif not self.isRed and enemyPos[0] >= self.middle:
             xDiff = enemyPos[0] - selfPos[0]
             yDiff = enemyPos[1] - selfPos[1]
-            if xDiff == 1:
+            if xDiff == 1 and yDiff == 0:
                 return 'East'
-            if xDiff == -1:
+            if xDiff == -1 and yDiff == 0:
                 return 'West'
-            if yDiff == 1:
+            if yDiff == 1 and xDiff == 0:
                 return 'North'
-            if yDiff == -1:
+            if yDiff == -1 and xDiff == 0:
                 return 'South'
 
             return self.defensiveBreadthFirstSearch(gameState, self.index, enemyPos, self.noHeuristic)[0]
 
-        if self.index > 1 and gameState.getScore() < 1 and ghostManhattans[self.enemyIndex] > 2:
+        if self.index > 1 and gameState.getScore() < 1 and ghostManhattans[self.enemyIndex] > 4:
             if self.isRed and selfPos[0] > self.middle/2:
                 return self.foodBreadthFirstSearch(gameState, self.index, bestFood, self.noHeuristic)[0]
             elif not self.isRed and selfPos[0] < self.middle + (self.middle / 2):
@@ -108,48 +122,49 @@ class testAgent(CaptureAgent):
 
 
 
-        newEnemyPos = guardSpot
-        newState = copy(gameState)
+        # newEnemyPos = guardSpot
+        # newState = copy(gameState)
 
-        for i in range(10):
-            adjacent = newState.getLegalActions(self.enemyIndex)
-            adjacent.remove('Stop')
-            if len(adjacent) == 0:
-                newEnemyPos = newState.getAgentPosition(self.enemyIndex)
-                break
-            chosenAction = None
-            if self.isRed:
-                if 'West' in adjacent:
-                    chosenAction = 'West'
-                elif 'East' in adjacent:
-                    if len(adjacent) == 1:
-                        chosenAction = 'East'
-                    else:
-                        adjacent.remove('East')
-                        chosenAction = random.choice(adjacent)
-                else:
-                    chosenAction = random.choice(adjacent)
-            if not self.isRed:
-                if 'East' in adjacent:
-                    chosenAction = 'East'
-                elif 'West' in adjacent:
-                    if len(adjacent) == 1:
-                        chosenAction = 'West'
-                    else:
-                        adjacent.remove('West')
-                        chosenAction = random.choice(adjacent)
-                else:
-                    chosenAction = random.choice(adjacent)
-            newState = newState.generateSuccessor(self.enemyIndex, chosenAction)
+        # for i in range(10):
+        #     adjacent = newState.getLegalActions(self.enemyIndex)
+        #     adjacent.remove('Stop')
+        #     if len(adjacent) == 0:
+        #         newEnemyPos = newState.getAgentPosition(self.enemyIndex)
+        #         break
+        #     chosenAction = None
+        #     if self.isRed:
+        #         if 'West' in adjacent:
+        #             chosenAction = 'West'
+        #         elif 'East' in adjacent:
+        #             if len(adjacent) == 1:
+        #                 chosenAction = 'East'
+        #             else:
+        #                 adjacent.remove('East')
+        #                 chosenAction = random.choice(adjacent)
+        #         else:
+        #             chosenAction = random.choice(adjacent)
+        #     if not self.isRed:
+        #         if 'East' in adjacent:
+        #             chosenAction = 'East'
+        #         elif 'West' in adjacent:
+        #             if len(adjacent) == 1:
+        #                 chosenAction = 'West'
+        #             else:
+        #                 adjacent.remove('West')
+        #                 chosenAction = random.choice(adjacent)
+        #         else:
+        #             chosenAction = random.choice(adjacent)
+        #     newState = newState.generateSuccessor(self.enemyIndex, chosenAction)
 
-        newEnemyPos = newState.getAgentPosition(self.enemyIndex)
+        #newEnemyPos = newState.getAgentPosition(self.enemyIndex)
+
         if self.isRed and selfPos[0] >= self.middle:
             return self.breadthFirstSearch(gameState, self.index, guardSpot, self.noHeuristic)[0]
         elif not self.isRed and selfPos[0] <= self.middle:
             return self.breadthFirstSearch(gameState, self.index, guardSpot, self.noHeuristic)[0]
 
         if ghostManhattans[self.enemyIndex] > 4:
-            return self.breadthFirstSearch(gameState, self.index, guardSpot, self.noHeuristic)[0]
+            return self.defensiveBreadthFirstSearch(gameState, self.index, guardSpot, self.noHeuristic)[0]
         else:
             return self.defensiveBreadthFirstSearch(gameState, self.index, guardSpot, self.noHeuristic)[0]
         #print("Done! Guarding: ",guardSpot)
